@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI PDF Reader</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <main class="app">
+        <section class="hero">
+            <div class="badge">Local AI • Private PDF Search</div>
+            <h1>AI PDF Reader</h1>
+            <p>
+                Upload a PDF, ask questions, and get grounded answers using
+                local embeddings and a local language model.
+            </p>
+        </section>
+
+        <section class="card">
+            <form action="/upload" method="post" enctype="multipart/form-data" onsubmit="showUploadLoading()">
+                <label for="pdf_file">Upload PDF</label>
+
+                <div class="input-row">
+                    <input 
+                        id="pdf_file" 
+                        name="pdf_file" 
+                        type="file" 
+                        accept="application/pdf"
+                        required
+                    >
+                    <button id="upload-button" type="submit">Upload</button>
+                </div>
+            </form>
+
+            {% if uploaded_filename %}
+                <p class="file-status">Current PDF: {{ uploaded_filename }}</p>
+            {% else %}
+                <p class="file-status">No PDF uploaded yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <form action="/ask" method="post" onsubmit="showAskLoading()">
+                <label for="question">Ask a question</label>
+
+                <div class="input-row">
+                    <input 
+                        id="question" 
+                        name="question" 
+                        type="text" 
+                        placeholder="What is the scan quality?"
+                        value="{{ question }}"
+                        required
+                    >
+                    <button id="ask-button" type="submit">Ask</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="loading-card" class="loading-card">
+            <div class="spinner"></div>
+            <p id="loading-text">Thinking...</p>
+        </section>
+
+        <section class="answer-card">
+            <p class="label">Answer</p>
+
+            {% if answer %}
+                <h2>{{ answer }}</h2>
+            {% else %}
+                <h2>Your answer will appear here.</h2>
+            {% endif %}
+
+            <div class="sources">
+                <p class="label">Sources</p>
+
+                {% if sources %}
+                    {% for source in sources %}
+                        <div class="source-preview">
+                            <div class="source-title">
+                                Chunk {{ source.chunk }} · {{ source.similarity }}
+                            </div>
+                            <p>{{ source.preview }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <span>No sources yet</span>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function showUploadLoading() {
+            document.getElementById("loading-card").style.display = "flex";
+            document.getElementById("loading-text").innerText = "Uploading and processing PDF...";
+            document.getElementById("upload-button").disabled = true;
+            document.getElementById("upload-button").innerText = "Processing...";
+        }
+
+        function showAskLoading() {
+            document.getElementById("loading-card").style.display = "flex";
+            document.getElementById("loading-text").innerText = "Searching your PDF and thinking...";
+            document.getElementById("ask-button").disabled = true;
+            document.getElementById("ask-button").innerText = "Thinking...";
+        }
+    </script>
+</body>
+</html>
